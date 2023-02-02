@@ -1,8 +1,8 @@
-# Hardware Testbed and Large-scale Testbed Co-simulation based Hardware in Loop 
+# Hardware Testbed and Large-scale Testbed Co-simulation based Hardware in Loop Simulation
 
 ## Overview
 
-**H**ardware **T**est**B**ed and **L**arge-scale **T**est**B**ed Co-Simulation (HLTB Co-Sim) is a hardware based real-time hybrid EMT-phasor simulation. 
+**H**ardware **T**est**B**ed and **L**arge-scale **T**est**B**ed Co-Simulation (HLTB Co-Sim) is a real-time hybrid EMT-phasor simulation for Hardware in Loop (HIL) Simulation.
 
 ## Background
 
