@@ -12,15 +12,21 @@
 
 Create an environment HLC for the co-sim (recommended)
 
-``conda create --name hlc python=3.8``
+```
+conda create --name hlc python=3.8
+```
 
 Activate the environment
 
-``conda activate hlc``
+```
+conda activate hlc
+```
 
 Install the required packages
 
-``conda install --file requirements.txt``
+```
+conda install --file requirements.txt
+```
 
 Then you have a working Python environment named ``hlc``.
 
