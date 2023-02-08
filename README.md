@@ -22,7 +22,7 @@ conda activate hlc
 
 Install the required packages
 ```
-conda install --file requirements.txt
+pip install -r requirements.txt
 ```
 
 Then you have a working Python environment named ``hlc``.
