@@ -11,19 +11,16 @@
 ## Installation
 
 Create an environment HLC for the co-sim (recommended)
-
 ```
 conda create --name hlc python=3.8
 ```
 
 Activate the environment
-
 ```
 conda activate hlc
 ```
 
 Install the required packages
-
 ```
 conda install --file requirements.txt
 ```
@@ -34,20 +31,20 @@ Then you have a working Python environment named ``hlc``.
 
 The LTB part should be started first:
 
-1. In an Anaconda Terminal (windows start menu), change the path to the working path (``cd $HOME:\hlcosim\``)
-2. Activate the HLC environment by ``conda activate hlc``
-3. Open Jupyter Notebook by ``jupyter notebook``
-4. In the Jupyter Notebook (usually hosted in a web browser), open the code file ``htb.ipynb``
-5. Click the "Cell" button in the menu bar, then click ``Run all`` and wait unitl LTB is ready
-6. Then the HTB part is good to go
+In an Anaconda Terminal (windows start menu), change the path to the working path
+```
+cd $HOME:\hlcosim\
+```
 
-Stop LTB:
+Activate the HLC environment
+```
+conda activate hlc
+```
 
-Click the "Kernel" button in the menu bar, then click ``Interrupt`` to stop the running code.
-
-Restart LTB:
-
-To restart the program for another test, click ``Restart and run all``
+Open Jupyter Notebook
+```
+jupyter notebook
+```
 
 [^1]: L. M. Tolbert et al., "Reconfigurable Real-Time Power Grid Emulator for Systems With High Penetration of Renewables," in IEEE Open Access Journal of Power and Energy, vol. 7, pp. 489-500, 2020, doi: [10.1109/OAJPE.2020.3030219](https://ieeexplore.ieee.org/document/9220900).
     
