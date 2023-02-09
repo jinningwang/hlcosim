@@ -17,7 +17,7 @@ path_file = os.path.join(path, 'tdatar.txt')
 try:
     os.remove(path_file)
     logger.warning("Successfully remove file %s" % path_file)
-except:
+except FileNotFoundError:
     pass
 
 # --- emulated data IO ---

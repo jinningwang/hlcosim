@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 
 io_config = dict(k_df=-4, p_df=0, q_df=0, htb_s=1e4, htb_b=-2)
 
+
 def data_read(file, config=io_config):
     """
     Read data from a txt file.
@@ -29,7 +30,8 @@ def data_read(file, config=io_config):
     io_flag: bool
         Flag to indicate if data reading is successful
     """
-    [k_df, p_df, q_df] = [io_config['k_df'], io_config['p_df'], io_config['q_df']]
+    [k_df, p_df, q_df] = [io_config['k_df'], io_config['p_df'],
+                          io_config['q_df']]
     io_flag = False
     try:
         txtr = open(file)
@@ -56,7 +58,8 @@ def data_write(dataw, file, config=io_config):
     """
     Write data into a txt file.
 
-        ``k``, ``p``, and ``q`` are the counter, active power, and reactive power, respectively.
+    ``k``, ``p``, and ``q`` are the counter, active power,
+    and reactive power, respectively.
 
     Parameters
     ------------
