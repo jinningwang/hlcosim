@@ -1,5 +1,12 @@
 ## Data I/O
 
+The data exchange flow is depicted as below:
+
+```
+![timeline](./docs/timeline.svg)
+<img src="./docs/timeline.svg">
+```
+
 Data IO from HTB to LTB is converted by a linear function:
 
 $$
