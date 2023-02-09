@@ -6,7 +6,7 @@
 
 ## Background
 
-**H**ardware **T**est**B**ed (HTB) is a power electronic-based power system emulators[^1], and **L**arge-scale **T**est**B**ed (LTB)[^3][^4] is a large-scale power system simulation that can be used as virtual grid or digital twin of a real power grid.
+**H**ardware **T**est**B**ed (HTB) is a power electronic-based power system emulators[^1], and **L**arge-scale **T**est**B**ed (LTB)[^4] is a large-scale power system simulation that can be used as virtual grid or digital twin of a real power grid.
 
 ## Installation
 
@@ -48,7 +48,7 @@ $$
 
 where $x$ is the data from LTB, $y$ is the data to HTB, $htb_{s}$ is the scale factor.
 
-Data IO configuration is stored in a dict ``io_config``:
+Data IO configuration is stored in a dict ``io_config``located in ``dataio.py``:
 
 ```python
 """
