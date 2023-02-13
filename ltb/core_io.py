@@ -46,9 +46,11 @@ def data_read(file, config=io_config):
         msg = "Data read from %s: k=%d, p=%f, q=%f" % (file, k, p, q)
     except FileNotFoundError:
         out = [k_df, p_df, q_df]
+        txtc = 'ERROR: File Not Found'
         msg = "File Not Found Error occured data read from %s error" % file
     except ValueError:
         out = [k_df, p_df, q_df]
+        txtc = 'ERROR: Value Error'
         msg = "Value Error occured data read from %s error" % file
     logger.info(msg)
     return out, txtc, io_flag

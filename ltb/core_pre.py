@@ -8,6 +8,7 @@ path_data = os.path.join(path_ltb, 'data')
 filer = os.path.join(path_data, rflie)
 filew = os.path.join(path_data, wfile)
 path_ehtb = os.path.join(path_data, 'ehtb.py')
+path_test = os.path.join(path_data, 'test.py')
 
 case1 = os.path.join(path_case, 'ieee14_htb.xlsx')
 case2 = os.path.join(path_case, 'pjm5_htb.xlsx')

@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 path = os.path.dirname(os.path.abspath(__file__))
 path_file = os.path.join(path, 'tdatar.txt')
 
+T_htb = 0.05  # HTB period
+
 try:
     os.remove(path_file)
     logger.warning("Successfully remove file %s" % path_file)
@@ -21,12 +23,13 @@ except FileNotFoundError:
     pass
 
 # --- emulated data IO ---
-logger.warning('Emulated data IO start!')
+msg = 'Emulated data IO start, period = %f' % T_htb
+logger.warning(msg)
 for j in range(3):
     logger.warning("Counter base Updated to %d" % j)
     for i in range(11, 200):
         # time.sleep(0.049)
-        time.sleep(0.04)
+        time.sleep(T_htb)
         scsv = open(path_file, "w")
         with scsv as f:
             f.write(f'{i}\n22349\n21230\n')
