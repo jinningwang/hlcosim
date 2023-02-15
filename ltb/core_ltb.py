@@ -33,7 +33,7 @@ path_ltb = os.path.join(path_proj, 'core_ltb.py')
 filer = os.path.join(path_data, rflie)
 filew = os.path.join(path_data, wfile)
 path_ehtb = os.path.join(path_data, 'ehtb.py')
-path_out = os.path.join(path_proj, 'output')
+path_out = os.path.join(os.path.abspath('..'), 'output')
 
 case1 = os.path.join(path_case, 'ieee14_htb.xlsx')
 case2 = os.path.join(path_case, 'pjm5_htb.xlsx')
