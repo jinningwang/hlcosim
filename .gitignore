@@ -132,3 +132,6 @@ dmypy.json
 #mac
 .DS_Store
 *~
+
+# output
+ltb/output/
