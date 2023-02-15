@@ -22,17 +22,19 @@ try:
 except FileNotFoundError:
     pass
 
+time.sleep(3)
+
 # --- emulated data IO ---
 msg = 'Emulated data IO start, period = %f' % T_htb
 logger.warning(msg)
 for j in range(3):
-    logger.warning("Counter base Updated to %d" % j)
+    logger.warning("eHTB: Counter base Updated to %d" % j)
     for i in range(11, 200):
         # time.sleep(0.049)
         time.sleep(T_htb)
         scsv = open(path_file, "w")
         with scsv as f:
-            f.write(f'{i}\n22349\n21230\n')
+            f.write(f'{i:x}\n122\n122\n')
             scsv.close()
 logger.warning('Emulated data IO end!')
 
