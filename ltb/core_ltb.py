@@ -15,7 +15,7 @@ from core_io import data_read, data_write, io_config, cs_stat, cs_config, cs_col
 logger = logging.getLogger(__name__)
 
 
-is_test = True
+is_test = False
 rflie = 'datar.txt'
 wfile = 'dataw.txt'
 if is_test:
@@ -109,16 +109,6 @@ tf_htb = t0_htb + cs_config['t_step']
 
 while (cs_stat['kr'] != 11):
     # --- repeat reading data until kr==11 ---
-    # # --- DEBUG ---
-    # pp = 0
-    # print("FILE:", filer)
-    # while pp in range(600):
-    #     [cs_stat['kr'], cs_stat['p'], cs_stat['q']], txtc, flag_datar = data_read(file=filer, config=io_config)
-    #     pp += 1
-    #     time.sleep(0.045)
-    #     print(cs_stat['kr'])
-    # exit()
-    # # --- DEBUG END ---
     [cs_stat['kr'], cs_stat['p'], cs_stat['q']], txtc, flag_datar = data_read(file=filer, config=io_config)
     kr0 = cs_stat['kr']
     k0 = cs_stat['k']

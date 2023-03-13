@@ -8,12 +8,12 @@ io_config = dict(k_df=-4, p_df=0, q_df=0, htb_s=1e4, htb_b=-2)
 
 cs_stat = dict(iter_total=0, iter_fail=0,
                kr=-1, k=0,
-               a_ltb=0, p=0, q=0, tw=0, tr=0)
+               a_ltb=0, p=0, q=0, tw=0, tr=0, tsim=0)
 
-cs_config = dict(ti=1, t_step=0.05, t_total=5,
-                 itermax_io=100, load_switch=True)
+cs_config = dict(ti=1, t_step=0.05, t_total=200,
+                 itermax_io=20, load_switch=True)
 
-cs_col = ['kr', 'k', 'a_ltb', 'p', 'q', 'tw', 'tr']
+cs_col = ['kr', 'k', 'a_ltb', 'p', 'q', 'tw', 'tr', 'tsim']
 
 def data_read(file, config=io_config):
     """
@@ -46,7 +46,7 @@ def data_read(file, config=io_config):
         txtc = txtr.read()
         txtr.close()
         # HEX to DEC  # NOTE: previous version: [k, p, q] = [int(i, 10) for i in txtc.split()]
-        [k, p, q] = [int(i, 16) for i in txtc.split()]
+        [k, p, q] = [int(i, 10) for i in txtc.split()]
         # --- data conversion ---
         p = p / io_config['htb_s'] + io_config['htb_b']
         q = q / io_config['htb_s'] + io_config['htb_b']
