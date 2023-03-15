@@ -27,10 +27,6 @@ Git clone the LTB packages:
 git clone https://github.com/CURENT/ltb.git --recursive
 ```
 
-```
-https://github.com/CURENT/dime.git
-```
-
 ### AGVis
 
 ```
