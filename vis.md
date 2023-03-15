@@ -70,3 +70,30 @@ sudo -E env "PATH=$PATH" jupyter notebook --allow-root
 ```
 Note:
 - Run the jupyter notebook with root access
+
+Extra settings for file IO between windows and WSL:
+```
+import os
+
+# Windows file path
+windows_file_path = r"C:\path\to\file.txt"
+
+# WSL file path
+wsl_file_path = os.path.join(os.path.expanduser("~"), "path", "to", "file.txt")
+
+# Read file from Windows file system
+with open(windows_file_path, "r") as f:
+    data = f.read()
+
+# Write file to Windows file system
+with open(windows_file_path, "w") as f:
+    f.write("Hello, world!")
+
+# Read file from WSL file system
+with open(wsl_file_path, "r") as f:
+    data = f.read()
+
+# Write file to WSL file system
+with open(wsl_file_path, "w") as f:
+    f.write("Hello, world!")
+```

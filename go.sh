@@ -16,18 +16,20 @@ build() {
 
     git clone https://github.com/CURENT/ltb.git --recursive
 
-    echo "Install LTB DiME ..."
-    cd $HOME/hlcosim/ltb/dime/server
-    make
-    make install
+    echo "Install LTB ANDES ..."
+    cd $HOME/hlcosim/ltb/andes/
+    pip install -r requirements.txt
 
-    echo "Initialize LTB ANDES ..."
-    cd $HOME/hlcosim
     andes prep
 
     if [ -f $HOME/.andes/andes.rc ]; then rm $HOME/.andes/andes.rc; fi
     cp $HOME/hlcosim/code/andes.rc $HOME/.andes/
     echo "Removed default andes config and set the given config."
+
+    echo "Install LTB DiME ..."
+    cd $HOME/hlcosim/ltb/dime/server
+    make
+    make install
 }
 
 clean() {
