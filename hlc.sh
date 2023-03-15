@@ -1,3 +1,4 @@
-if [ -f /home/.andes/andes.rc ]; then rm /home/.andes/andes.rc; fi
 
-cp `pwd`/ltb/andes.rc /home/.andes/
+if [ -f $HOME/.andes/andes.rc ]; then rm $HOME/.andes/andes.rc; fi
+
+cp `pwd`/ltb/andes.rc $HOME/.andes/
