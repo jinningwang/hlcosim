@@ -2,3 +2,4 @@ openssl
 zlib
 jansson
 andes
+jupyter
