@@ -1,8 +1,3 @@
-
-[ -f env.sh ] && . env.sh
-
-build{
-
 echo "Current environment is: $CONDA_DEFAULT_ENV"
 
 echo "Installate dependencies ..."
@@ -25,5 +20,3 @@ andes prep -f
 if [ -f $HOME/.andes/andes.rc ]; then rm $HOME/.andes/andes.rc; fi
 cp $HOME/hlcosim/ltb/andes.rc $HOME/.andes/
 echo "Removed default andes config and set the given config."
-
-}
