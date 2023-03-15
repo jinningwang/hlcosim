@@ -1,5 +1,5 @@
 
-build{
+build() {
     echo "Current environment is: $CONDA_DEFAULT_ENV"
 
     echo "Installate dependencies ..."
@@ -22,4 +22,14 @@ build{
     if [ -f $HOME/.andes/andes.rc ]; then rm $HOME/.andes/andes.rc; fi
     cp $HOME/hlcosim/ltb/andes.rc $HOME/.andes/
     echo "Removed default andes config and set the given config."
+}
+
+clean () {
+    echo "Current environment is: $CONDA_DEFAULT_ENV"
+
+    echo "Remove LTB packages ..."
+    if [ -f $HOME/hlcosim/ltb/ ]; then rm -rf $HOME/hlcosim/ltb; fi
+
+    echo "Remove LTB DiME file ..."
+    if [ -f tmp/dime2 ]; then rm tmp/dime2; fi
 }
