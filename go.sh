@@ -1,5 +1,7 @@
 
-build() {
+#!/bin/bash
+
+function build {
     echo "Current environment is: $CONDA_DEFAULT_ENV"
 
     echo "Installate dependencies ..."
@@ -24,7 +26,7 @@ build() {
     echo "Removed default andes config and set the given config."
 }
 
-clean () {
+function clean {
     echo "Current environment is: $CONDA_DEFAULT_ENV"
 
     echo "Remove LTB packages ..."
@@ -32,4 +34,16 @@ clean () {
 
     echo "Remove LTB DiME file ..."
     if [ -f tmp/dime2 ]; then rm tmp/dime2; fi
+}
+
+function dime {
+    sudo dime -l unix:/tmp/dime2 -l unix:/var/run/dime.sock -l ws:8818 -vv
+}
+
+function agvis {
+    python3 -m http.server -d ./static 8810 --bind 0.0.0.0
+}
+
+function jupyter {
+    sudo -E env "PATH=$PATH" jupyter notebook --allow-root
 }
