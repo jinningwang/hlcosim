@@ -8,12 +8,13 @@ io_config = dict(k_df=-4, p_df=0, q_df=0, htb_s=1e4, htb_b=-2)
 
 cs_stat = dict(iter_total=0, iter_fail=0,
                kr=-1, k=0,
-               a_ltb=0, p=0, q=0, tw=0, tr=0, tsim=0)
+               v=0, freq=0, p=0, q=0, 
+               tw=0, tr=0, tsim=0, tf=0,)
 
-cs_config = dict(ti=1, t_step=0.05, t_total=200,
+cs_config = dict(ti=1, t_step=0.05, t_total=20,
                  itermax_io=20, load_switch=True)
 
-cs_col = ['kr', 'k', 'a_ltb', 'p', 'q', 'tw', 'tr', 'tsim']
+cs_col = list(cs_stat.keys())[2:]
 
 def data_read(file, config=io_config):
     """
