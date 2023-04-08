@@ -1,5 +1,5 @@
 """
-Core module of hlcosim.
+Core module of HTB-LTB co-simulation..
 """
 import os
 import logging
@@ -112,7 +112,19 @@ def run(case='ieee39_htb.xlsx', tf=20,
         read_file = 'datar.txt', write_file = 'dataw.txt',
         test_mode=True, AGC_control=True, **kwargs):
     """
-    Run the simulation.
+    Run the HTB-LTB co-simulation.
+
+    In test mode, the counter in data IO is force updated without
+    interfacing with HTB.
+
+    AGC control is defined by a PI controller as follows:
+
+    ACE_integral = ACE_integral + ACEc
+
+    ACE_raw = -(Kp*ACEc + Ki*ACE_integral)
+
+    where ACEc is the error measured by model ACEc in ANDES,
+    and ACE_raw is the ACE error sent to the control center.
 
     Parameters
     ------------
@@ -195,7 +207,7 @@ def run(case='ieee39_htb.xlsx', tf=20,
     ss.setup()
 
     msg_version = f"ANDES version: {andes.__version__}\n"
-    msg_io = f"IO path: {path_data}\n Output data path: {path_out}\n"
+    msg_io = f"IO path: {path_data}\nOutput data path: {path_out}\n"
     msg_agc = f"Test mode: {test_mode}\n"
     ttl = '{:,}'.format(ss.PQ.p0.v.sum() * ss.config.mva / 1e3)
     msg_ltb = f"LTB: {ss.Bus.n} bus; {ss.StaticGen.n} generator; {ttl} GW load.\n"
