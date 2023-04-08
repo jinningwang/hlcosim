@@ -21,7 +21,7 @@ status = dict(iter_total=0, iter_fail=0,
                v=0, freq=0, p=0, q=0, 
                tw=0, tr=0, tsim=0, tf=0,)
 
-config = dict(ti=1, t_step=0.05, t_total=20,
+config = dict(ti=1, t_step=0.05,
                  itermax_io=20, load_switch=True)
 
 scols = list(status.keys())[2:]
@@ -108,7 +108,7 @@ def data_write(dataw, file, config=io_config):
     return io_flag
 
 
-def run(case='ieee39_htb.xlsx',
+def run(case='ieee39_htb.xlsx', tf=20,
         read_file = 'datar.txt', write_file = 'dataw.txt',
         test_mode=True, AGC_control=True, **kwargs):
     """
@@ -118,6 +118,8 @@ def run(case='ieee39_htb.xlsx',
     ------------
     case: str
         Name of the LTB case file
+    tf: float
+        Simulation end time
     read_file: str
         Name of the file to read
     write_file: str
@@ -198,7 +200,7 @@ def run(case='ieee39_htb.xlsx',
     msg_htb = f"HTB: {pq_htb} is connected to bus {bus_htb} in LTB.\n"
     logger.warning(msg_version + msg_io + msg_agc + msg_htb)
 
-    rows = np.ceil((config['t_total'] - config['ti'] + 1) / config['t_step'])
+    rows = np.ceil((tf - config['ti'] + 1) / config['t_step'])
     cs_num = -1 * np.ones((int(rows), len(scols)))
 
     const_freq = 2 * np.pi * ss.config.freq  # constant to calculate bus angle
@@ -235,7 +237,7 @@ def run(case='ieee39_htb.xlsx',
 
     t0_htb = time.time()
 
-    rows = config['t_total'] / config['t_step']
+    rows = tf / config['t_step']
     k0 = 0
 
     logger.warning("LTB ready, start HTB to continue...")
