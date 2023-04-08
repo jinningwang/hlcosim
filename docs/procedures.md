@@ -4,6 +4,8 @@ The LTB part is running in WSL, and the communication is done by file IO on disk
 
 You can use the LTB ANDES only for co-simulation, and you can also start all LTB modules for simulation and geo-visualization.
 
+NOTE: if you are using VSCode to run LTB DiME and LTB AGVis, remember to forward the port manually because sometimes this will not be automatically done.
+
 ### LTB ANDES
 
 In an Unix-likke terminal, change the path to the co-sim path
