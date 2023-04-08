@@ -195,10 +195,12 @@ def run(case='ieee39_htb.xlsx', tf=20,
     ss.setup()
 
     msg_version = f"ANDES version: {andes.__version__}\n"
-    msg_io = f"IO path: {path_data}\n"
+    msg_io = f"IO path: {path_data}\n Output data path: {path_out}\n"
     msg_agc = f"Test mode: {test_mode}\n"
+    ttl = '{:,}'.format(ss.PQ.p0.v.sum() * ss.config.mva / 1e3)
+    msg_ltb = f"LTB: {ss.Bus.n} bus; {ss.StaticGen.n} generator; {ttl} GW load.\n"
     msg_htb = f"HTB: {pq_htb} is connected to bus {bus_htb} in LTB.\n"
-    logger.warning(msg_version + msg_io + msg_agc + msg_htb)
+    logger.warning(msg_version + msg_io + msg_agc + msg_ltb + msg_htb)
 
     rows = np.ceil((tf - config['ti'] + 1) / config['t_step'])
     cs_num = -1 * np.ones((int(rows), len(scols)))
@@ -254,81 +256,86 @@ def run(case='ieee39_htb.xlsx', tf=20,
     flag_init = False  # Turn off init_flag after first iteration
     logger.warning("Co-sim initialized.")
     while status['k'] < rows:
-        if flag_tc0:
-            tc0 = time.time()  # record clock time
-            flag_tc0 = False
-        # --- data read ---
-        # NOTE: repeat reading data until counter update
-        iter_read = 0
-        k0 = status['k']
-        # NOTE: repeat reading data until read counter `status['kr]` update
-        t0_htb = time.time()
-        while (status['kr'] != kr0 + 1) & (iter_read <= config['itermax_io']):
-            [status['kr'], status['p'], status['q']], txtc, flag_datar = data_read(file=read_path, config=io_config)
-            if test_mode:
-                status['kr'] = kr0 + 1  # Force update kr for test_mode test
-            [io_config['p_df'], io_config['q_df']] = [status['p'], status['q']]
-            iter_read += 1
-        if iter_read > config['itermax_io']:
-            status['p'], status['q'] = io_config['p_df'], io_config['q_df']
-        tc1 = time.time()  # record clock time
-        # NOTE: update cumulative counter if read counter update successfully
-        kr0 = status['kr']
-        k0 = status['k']
-        status['k'] += 1
-        # --- LTB sim ---
-        # --- info ---
-        if np.mod(status['k'], 200) == 0:
-            logger.warning("LTB simulated to %ds" % ss.TDS.config.tf)
-        # --- send data to HTB ---
-        # NOTE: Make sure `BusFreq` is connected to the load bus
-        f_bus = ss.BusFreq.get(idx='BusFreq_HTB', src='f', attr='v')  # p.u.
-        v_bus = ss.Bus.get(idx=bus_htb, src='v', attr='v')  # RMS, p.u.
-        dataw = [v_bus, f_bus]  # LTB: voltage, frequency
-        data_write(dataw=dataw, file=write_path, config=io_config)
-        tc2 = time.time()  # send end time
-        # --- LTB simulation ---
-        p_inj = config['load_switch'] * status['p']
-        q_inj = config['load_switch'] * status['q']
-        # a) set PQ data in LTB
-        ss.PQ.set(value=p_inj + p0, idx=pq_htb, src='Ppf', attr='v')
-        ss.PQ.set(value=q_inj + q0, idx=pq_htb, src='Qpf', attr='v')
-        # b) TDS
-        ss.TDS.config.tf += config['t_step']
-        # AGC
-        if status['k'] * config['t_step'] % intv_agc == 0:
-            ss.TurbineGov.set(src='paux0', idx=tgov_idx, attr='v', value=AGC_control * ACE_raw)
-        ss.TDS.run()
-        if ss.exit_code != 0:
-            logger.warning("LTB simulation failed at %ds" % ss.TDS.config.tf)
+        try:
+            if flag_tc0:
+                tc0 = time.time()  # record clock time
+                flag_tc0 = False
+            # --- data read ---
+            # NOTE: repeat reading data until counter update
+            iter_read = 0
+            k0 = status['k']
+            # NOTE: repeat reading data until read counter `status['kr]` update
+            t0_htb = time.time()
+            while (status['kr'] != kr0 + 1) & (iter_read <= config['itermax_io']):
+                [status['kr'], status['p'], status['q']], txtc, flag_datar = data_read(file=read_path, config=io_config)
+                if test_mode:
+                    status['kr'] = kr0 + 1  # Force update kr for test_mode test
+                [io_config['p_df'], io_config['q_df']] = [status['p'], status['q']]
+                iter_read += 1
+            if iter_read > config['itermax_io']:
+                status['p'], status['q'] = io_config['p_df'], io_config['q_df']
+            tc1 = time.time()  # record clock time
+            # NOTE: update cumulative counter if read counter update successfully
+            kr0 = status['kr']
+            k0 = status['k']
+            status['k'] += 1
+            # --- LTB sim ---
+            # --- info ---
+            if np.mod(status['k'], 200) == 0:
+                logger.warning("LTB simulated to %ds..." % ss.TDS.config.tf)
+            # --- send data to HTB ---
+            # NOTE: Make sure `BusFreq` is connected to the load bus
+            f_bus = ss.BusFreq.get(idx='BusFreq_HTB', src='f', attr='v')  # p.u.
+            v_bus = ss.Bus.get(idx=bus_htb, src='v', attr='v')  # RMS, p.u.
+            dataw = [v_bus, f_bus]  # LTB: voltage, frequency
+            data_write(dataw=dataw, file=write_path, config=io_config)
+            tc2 = time.time()  # send end time
+            # --- LTB simulation ---
+            p_inj = config['load_switch'] * status['p']
+            q_inj = config['load_switch'] * status['q']
+            # a) set PQ data in LTB
+            ss.PQ.set(value=p_inj + p0, idx=pq_htb, src='Ppf', attr='v')
+            ss.PQ.set(value=q_inj + q0, idx=pq_htb, src='Qpf', attr='v')
+            # b) TDS
+            ss.TDS.config.tf += config['t_step']
+            # AGC
+            if status['k'] * config['t_step'] % intv_agc == 0:
+                ss.TurbineGov.set(src='paux0', idx=tgov_idx, attr='v', value=AGC_control * ACE_raw)
+            ss.TDS.run()
+            if ss.exit_code != 0:
+                logger.warning("LTB simulation failed at %ds" % ss.TDS.config.tf)
+                break
+            tc3 = time.time()  # record clock time
+            # NOTE: tf_htb is the end time of last round
+            # update AGC PI Controller
+            ACE_integral = ACE_integral + ss.ACEc.ace.v.sum()
+            ACE_raw = -(Kp*ss.ACEc.ace.v.sum() + Ki*ACE_integral)
+            if tc3 - t0_htb > 2 * config['t_step']:
+                status['iter_fail'] += 1
+            status['tf'] = ss.TDS.config.tf  # LTB end time
+            status['tr'] = tc1 - t0_htb  # read time
+            status['tw'] = tc2 - tc1  # write time
+            status['tsim'] = tc3 - tc2  # write time
+            status['freq'] = f_bus  # freq of HTB bus
+            status['v'] = v_bus  # freq of HTB bus
+            # update HTB time
+        #     t0_htb += config['t_step']
+            status['iter_total'] += 1
+            flag_base = True
+            #  --- record data ---
+            for col in scols:
+                cs_num[status['k']-1, scols.index(col)] = status[col]
+            # update counter base
+            if flag_base & (status['kr'] == 199):
+                status['kr'] = 10
+                kr0 = 10
+                flag_base = False
+            # --- check if end ---
+        except KeyboardInterrupt:
+            logger.warning("Keyboard interrupt received. Exiting...")
             break
-        tc3 = time.time()  # record clock time
-        # NOTE: tf_htb is the end time of last round
-        # update AGC PI Controller
-        ACE_integral = ACE_integral + ss.ACEc.ace.v.sum()
-        ACE_raw = -(Kp*ss.ACEc.ace.v.sum() + Ki*ACE_integral)
-        if tc3 - t0_htb > 2 * config['t_step']:
-            status['iter_fail'] += 1
-        status['tf'] = ss.TDS.config.tf  # LTB end time
-        status['tr'] = tc1 - t0_htb  # read time
-        status['tw'] = tc2 - tc1  # write time
-        status['tsim'] = tc3 - tc2  # write time
-        status['freq'] = f_bus  # freq of HTB bus
-        status['v'] = v_bus  # freq of HTB bus
-        # update HTB time
-    #     t0_htb += config['t_step']
-        status['iter_total'] += 1
-        flag_base = True
-        #  --- record data ---
-        for col in scols:
-            cs_num[status['k']-1, scols.index(col)] = status[col]
-        # update counter base
-        if flag_base & (status['kr'] == 199):
-            status['kr'] = 10
-            kr0 = 10
-            flag_base = False
 
-    logger.warning("Co-sim end.")
+    logger.warning(f"Co-sim end at  {np.round(ss.TDS.config.tf, 3)}s.")
 
     # --- save data ---
     cosim_out = pd.DataFrame(data=cs_num[:status['iter_total']], columns=scols)
@@ -340,6 +347,6 @@ def run(case='ieee39_htb.xlsx', tf=20,
 
     cosim_out['tall'] = cosim_out['tw'] + cosim_out['tr']+ cosim_out['tsim']
     cosim_out.to_csv(csv_out, index=False, header=True)
-    logger.warning(f"Co-sim data save as: {csv_out}")
+    logger.warning(f"Co-sim data save as: {outfile}")
 
     return ss, cosim_out, status
