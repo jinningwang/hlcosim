@@ -260,7 +260,7 @@ def run(case='ieee39_htb.xlsx', tf=20,
     logger.warning(msg_version + msg_io + msg_agc + msg_ltb + msg_htb)
 
     rows = np.ceil((tf - config['ti'] + 1) / config['t_step'])
-    cs_num = -1 * np.ones((int(rows), len(scols)))
+    cosim_data = -1 * np.ones((int(rows), len(scols)))
 
     flag_tc0 = True  # Flag to record `tc0`
 
@@ -327,7 +327,6 @@ def run(case='ieee39_htb.xlsx', tf=20,
             if status['k'] % 200 == 0:
                 logger.warning("LTB simulated to %ds..." % ss.TDS.config.tf)
             # --- send data to HTB ---
-            # NOTE: Make sure `BusFreq` is connected to the load bus
             f_bus = ss.BusFreq.get(idx='BusFreq_HTB', src='f', attr='v')  # p.u.
             v_bus = ss.Bus.get(idx=bus_htb, src='v', attr='v')  # RMS, p.u.
             dataw = [v_bus, f_bus]  # LTB: voltage, frequency
@@ -345,24 +344,24 @@ def run(case='ieee39_htb.xlsx', tf=20,
             if status['k'] * config['t_step'] % config['intv_agc'] == 0:
                 ss.TurbineGov.set(src='paux0', idx=tgov_idx, attr='v', value=AGC_control * ACE.Raw)
             ss.TDS.run()
+            # If LTB simulation failed, stop the co-simulation
             if ss.exit_code != 0:
                 logger.warning("LTB simulation failed at %ds" % ss.TDS.config.tf)
                 break
             tc3 = time.time()  # record clock time
-            # NOTE: tf_htb is the end time of last round
             ACE.update(ss.ACEc.ace.v.sum())  # update AGC
             if tc3 - t0_htb > 2 * config['t_step']:
                 status['iter_fail'] += 1
             # --- update status ---
-            # NOTE: update status dict
             # LTB end time, read time, write time, sim time, freq, voltage
             status = {**status, 'tf': ss.TDS.config.tf, 'tr': tc1 - t0_htb,
           'tw': tc2 - tc1, 'tsim': tc3 - tc2, 'freq': f_bus, 'v': v_bus}
 
             status['iter_total'] += 1
             #  --- record data ---
-            for col in scols:
-                cs_num[status['k']-1, scols.index(col)] = status[col]
+            cosim_data[status['k']-1, :] = np.array([status[col] for col in scols])
+            # for col in scols:
+            #     cosim_data[status['k']-1, scols.index(col)] = status[col]
             # update counter base
             if status['kr'] == 199:
                 status['kr'] = 10
@@ -375,7 +374,7 @@ def run(case='ieee39_htb.xlsx', tf=20,
     logger.warning(f"Co-sim end at  {np.round(ss.TDS.config.tf, 3)}s.")
 
     # --- save data ---
-    cosim_out = pd.DataFrame(data=cs_num[:status['iter_total']], columns=scols)
+    cosim_out = pd.DataFrame(data=cosim_data[:status['iter_total']], columns=scols)
     # Time to datetime
     time_struct = time.localtime(tc0)
     date_string = time.strftime('%Y%m%d_%H%M', time_struct)
@@ -384,6 +383,13 @@ def run(case='ieee39_htb.xlsx', tf=20,
 
     cosim_out['tall'] = cosim_out['tw'] + cosim_out['tr']+ cosim_out['tsim']
     cosim_out.to_csv(csv_out, index=False, header=True)
-    logger.warning(f"Co-sim data save as: {outfile}")
+    logger.warning(f"Cosim data save as: {outfile}")
 
     return ss, cosim_out, status
+
+
+def _ss_setup(ss):
+    """
+    Setup ANDES system
+    """
+    
