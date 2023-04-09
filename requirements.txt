@@ -3,3 +3,5 @@ zlib
 jansson
 andes
 jupyter
+geopandas
+scienceplots
