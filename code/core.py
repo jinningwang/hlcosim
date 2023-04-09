@@ -16,12 +16,12 @@ andes.config_logger(stream_level=50)
 logger = logging.getLogger(__name__)
 
 status = OrderedDict([
-        ('iter_total', 0), ('iter_fail', 0),
-        ('kr', 0), ('k', 0),
-        ('v', 0), ('freq', 0), ('p', 0), ('q', 0),
-        ('pdef', 0), ('qdef', 0),
-        ('tw', 0), ('tr', 0), ('tsim', 0), ('tf', 0),
-        ])
+    ('iter_total', 0), ('iter_fail', 0),
+    ('kr', 0), ('k', 0),
+    ('v', 0), ('freq', 0), ('p', 0), ('q', 0),
+    ('pdef', 0), ('qdef', 0),
+    ('tw', 0), ('tr', 0), ('tsim', 0), ('tf', 0),
+])
 
 scols = list(status.keys())[2:]
 
@@ -67,9 +67,9 @@ def data_io(file, data=None, pdef=None, qdef=None):
     b_htb: float
         Conversion bias
     """
-    kdef=-4
-    k_htb=1e4
-    b_htb=-2
+    kdef = -4
+    k_htb = 1e4
+    b_htb = -2
 
     exit_code = False
     try:
@@ -97,15 +97,17 @@ def data_io(file, data=None, pdef=None, qdef=None):
             writer = csv.writer(scsv)
             writer.writerow([i * k_htb for i in data])
             scsv.close()
-            msg = "Data write to %s: freq=%d, volt=%f" % (file, data[0], data[1])
+            msg = "Data write to %s: f=%d, v=%f" % (file, data[0], data[1])
         logger.debug(msg)
     except FileNotFoundError:
         out = [kdef, pdef, qdef] if data is None else None
-        msg = "File Not Found Error occurred" + (" data read from %s" % file if data is None else " data write to %s" % file)
+        file_type = "read from" if data is None else "write to"
+        msg = f"File Not Found Error occurred: data {file_type} {file}"
         logger.error(msg)
     except ValueError:
         out = [kdef, pdef, qdef] if data is None else None
-        msg = "Value Error occurred" + (" data read from %s" % file if data is None else " data write to %s" % file)
+        file_type = "read from" if data is None else "write to"
+        msg = f"Value Error occurred: data {file_type} {file}"
         logger.error(msg)
     return out, exit_code
 
@@ -114,6 +116,7 @@ class ACEObj:
     """
     ACE error class.
     """
+
     def __init__(self, Kp=0, Ki=0, Integral=0):
         """
         Calculate ACE error.
@@ -157,7 +160,7 @@ class ACEObj:
 
 def run(case='ieee39_htb.xlsx', tf=20,
         status=status,
-        read_file = 'datar.txt', write_file = 'dataw.txt',
+        read_file='datar.txt', write_file='dataw.txt',
         test_mode=True, AGC_control=True,
         ):
     """
@@ -199,8 +202,8 @@ def run(case='ieee39_htb.xlsx', tf=20,
         ('t_step', 0.05),
         ('itermax_io', 20),
         ('load_switch', True),
-        ])
-    
+    ])
+
     # --- set path ---
     path_proj = os.getcwd()
     path_case = os.path.join(path_proj, 'case')
@@ -225,37 +228,37 @@ def run(case='ieee39_htb.xlsx', tf=20,
 
     #  --- HTB variables ---
     pq_htb = 'PQ_2'  # load represents for HTB
-    bus_htb = ss.PQ.get(idx=pq_htb, src='bus', attr='v')  # get bus index of HTB
-    bus_slack = ss.Slack.bus.v[0]  # get bus index of slack bus
+    bus_htb = ss.PQ.get(idx=pq_htb, src='bus', attr='v')
+    bus_slack = ss.Slack.bus.v[0]
 
     # add Bus Freq. Measurement to HTB bus
     ss.add('BusFreq', {'idx': 'BusFreq_HTB',
-                    'name': 'BusFreq_HTB',
-                    'bus': bus_htb,
-                    'Tf': 0.02,
-                    'Tw': 0.02,
-                    'fn': 60})
+                       'name': 'BusFreq_HTB',
+                       'bus': bus_htb,
+                       'Tf': 0.02,
+                       'Tw': 0.02,
+                       'fn': 60})
     ss.add('BusFreq', {'idx': 'BusFreq_Slack',
-                    'name': 'BusFreq_Slack',
-                    'bus': bus_slack,
-                    'Tf': 0.02,
-                    'Tw': 0.02,
-                    'fn': 60})
+                       'name': 'BusFreq_Slack',
+                       'bus': bus_slack,
+                       'Tf': 0.02,
+                       'Tw': 0.02,
+                       'fn': 60})
     ss.add('Output', {'model': 'GENCLS',
-                    'varname': 'omega'})
+                      'varname': 'omega'})
     ss.add('Output', {'model': 'GENROU',
-                    'varname': 'omega'})
+                      'varname': 'omega'})
     ss.add('Output', {'model': 'Bus',
-                    'varname': 'a'})
+                      'varname': 'a'})
     ss.add('Output', {'model': 'Bus',
-                    'varname': 'v'})
+                      'varname': 'v'})
     ss.setup()
 
     msg_version = f"ANDES version: {andes.__version__}\n"
     msg_io = f"IO path: {path_data}\nOutput data path: {path_out}\n"
     msg_agc = f"Test mode: {test_mode}\n"
     ttl = '{:,}'.format(ss.PQ.p0.v.sum() * ss.config.mva / 1e3)
-    msg_ltb = f"LTB: {ss.Bus.n} bus; {ss.StaticGen.n} generator; {ttl} GW load.\n"
+    msg_ltb = f"LTB: {ss.Bus.n} bus; {ss.StaticGen.n} gens; {ttl} GW load.\n"
     msg_htb = f"HTB: {pq_htb} is connected to bus {bus_htb} in LTB.\n"
     logger.warning(msg_version + msg_io + msg_agc + msg_ltb + msg_htb)
 
@@ -355,7 +358,7 @@ def run(case='ieee39_htb.xlsx', tf=20,
             # --- update status ---
             # LTB end time, read time, write time, sim time, freq, voltage
             status = {**status, 'tf': ss.TDS.config.tf, 'tr': tc1 - t0_htb,
-          'tw': tc2 - tc1, 'tsim': tc3 - tc2, 'freq': f_bus, 'v': v_bus}
+                      'tw': tc2 - tc1, 'tsim': tc3 - tc2, 'freq': f_bus, 'v': v_bus}
 
             status['iter_total'] += 1
             #  --- record data ---
@@ -381,15 +384,8 @@ def run(case='ieee39_htb.xlsx', tf=20,
     outfile = f'output_{date_string}.csv'
     csv_out = os.path.join(path_out, outfile)
 
-    cosim_out['tall'] = cosim_out['tw'] + cosim_out['tr']+ cosim_out['tsim']
+    cosim_out['tall'] = cosim_out['tw'] + cosim_out['tr'] + cosim_out['tsim']
     cosim_out.to_csv(csv_out, index=False, header=True)
     logger.warning(f"Cosim data save as: {outfile}")
 
     return ss, cosim_out, status
-
-
-def _ss_setup(ss):
-    """
-    Setup ANDES system
-    """
-    
