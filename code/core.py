@@ -9,6 +9,9 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+
+from shapely.geometry import LineString
 
 import andes
 andes.config_logger(stream_level=50)
@@ -158,10 +161,96 @@ class ACEObj:
         return True
 
 
+def require_geopandas(func):
+    try:
+        import geopandas as gpd
+    except ImportError:
+        logger.warning("Geopandas is not installed. Skipping function.")
+        return
+
+    def wrapper(*args, **kwargs):
+        return func(gpd, *args, **kwargs)
+
+    return wrapper
+
+
+@require_geopandas
+def map_ss(ssa, path_map):
+    """
+    Plot the static power system map.
+    FIXME: incorrect input parameters definition
+
+    Parameters
+    ------------
+    ssa: andes.system.System 
+        ANDES system object
+    path_map: str
+        Path to the map data
+    """
+    map_state_name = "cb_2018_us_state_500k.zip"
+    map_county_name = "cb_2018_us_county_within_cd116_500k.zip"
+
+    # Read in shapefile of US states
+    map_st = gpd.read_file(os.path.join(path_map, map_state_name))
+    map_ct = gpd.read_file(os.path.join(path_map, map_county_name))
+
+    # --- Bus Data ---
+    bus_gen = list(ssa.PV.bus.v) + list(ssa.Slack.bus.v)
+    bus_load = list(ssa.PQ.bus.v)
+
+    xcoord_bus_gen = ssa.Bus.get(src='xcoord', idx=bus_gen, attr='v')
+    ycoord_bus_gen = ssa.Bus.get(src='ycoord', idx=bus_gen, attr='v')
+    xcoord_bus_load = ssa.Bus.get(src='xcoord', idx=bus_load, attr='v')
+    ycoord_bus_load = ssa.Bus.get(src='ycoord', idx=bus_load, attr='v')
+
+    p_bus = gpd.GeoDataFrame(geometry=gpd.points_from_xy(
+        ssa.Bus.xcoord.v, ssa.Bus.ycoord.v))
+    p_bus_gen = gpd.GeoDataFrame(geometry=gpd.points_from_xy(
+        xcoord_bus_gen, ycoord_bus_gen))
+    p_bus_load = gpd.GeoDataFrame(geometry=gpd.points_from_xy(
+        xcoord_bus_load, ycoord_bus_load))
+
+    # --- Line Data ---
+    transmission_lines = []
+    line_bus1 = ssa.Line.get(src='bus1', idx=ssa.Line.idx.v, attr='v')
+    line_bus2 = ssa.Line.get(src='bus2', idx=ssa.Line.idx.v, attr='v')
+    for bus1, bus2 in zip(line_bus1, line_bus2):
+        bus1x = ssa.Bus.get(src='xcoord', idx=bus1, attr='v')
+        bus1y = ssa.Bus.get(src='ycoord', idx=bus1, attr='v')
+        bus2x = ssa.Bus.get(src='xcoord', idx=bus2, attr='v')
+        bus2y = ssa.Bus.get(src='ycoord', idx=bus2, attr='v')
+        line_coords = [(bus1x, bus1y), (bus2x, bus2y)]
+        transmission_lines.append(LineString(line_coords))
+    l_lines = gpd.GeoDataFrame(geometry=transmission_lines)
+
+    fig, ax = plt.subplots(figsize=(5, 3), dpi=200)
+    map_st.plot(ax=ax, alpha=0.5, edgecolor='blue', facecolor='none',
+                linestyle='-', linewidth=0.5)
+    map_ct.plot(ax=ax, alpha=0.5, edgecolor='gray', facecolor='none',
+                linestyle='-', linewidth=0.2)
+
+    markersize = 10
+    l_lines.plot(ax=ax, color='black', linewidth=1)
+    p_bus_gen.plot(ax=ax, markersize=markersize, color='red')
+    p_bus_load.plot(ax=ax, markersize=markersize, color='black')
+
+    marginx = 0.3
+    marginy = 0.15
+    x_min, y_min, x_max, y_max = p_bus.total_bounds
+    x_range = x_max - x_min
+    y_range = y_max - y_min
+    ax.set_xlim(x_min - marginx * x_range, x_max + marginx * x_range)
+    ax.set_ylim(y_min - marginy * y_range, y_max + marginy * y_range)
+    ax.set_axis_off()
+    ax.set_title('IEEE 39-bus Test System Topology')
+
+    return fig, ax
+
+
 def run(case='ieee39_htb.xlsx', tf=20,
         status=status,
         read_file='datar.txt', write_file='dataw.txt',
-        test_mode=True, AGC_control=True,
+        test_mode=True, AGC_control=True, map=False,
         ):
     """
     Run the HTB-LTB co-simulation.
@@ -183,6 +272,8 @@ def run(case='ieee39_htb.xlsx', tf=20,
         Flag to indicate if test mode is on
     AGC_control: bool
         Flag to indicate if AGC control is on
+    map: bool
+        Flag to indicate if to plot static map
 
     Returns
     ---------
@@ -220,6 +311,9 @@ def run(case='ieee39_htb.xlsx', tf=20,
                     no_output=True,
                     default_config=False,
                     setup=False)
+
+    if map:
+        fig, ax = map_ss(ssa=ss, path_map=os.path.join(path_proj, 'map'))
 
     # --- AGC settings ---
     tgov_idx = 'TGOV1_1'  # TurbineGov idx
